@@ -1,3 +1,13 @@
+"""
+
+Damon [Spelling??] to poll for new webpages to display
+
+
+Robert Curran 16/3/17
+robert@robertcurran.co.uk
+
+"""
+
 import webbrowser
 import requests
 import time
@@ -5,7 +15,8 @@ import time
 
 # Set a display time limit of 3 days
 DisplayTimeLimit  = 172800
-
+# The time to sleep between polls
+PollRateDelay = 60
 
 
 
@@ -44,12 +55,12 @@ def display(webAddress):
 
 
 
+"""
+	handleResponse
 
-
-
-if __name__ == "__main__":
-
-	pollData = pollServer()
+	handles the poll response, this displays when appropiate
+"""
+def handleResponse(pollData):
 
 	print "Attempting to open: " , pollData["address"]
 
@@ -58,9 +69,22 @@ if __name__ == "__main__":
 
 	print "The unix diff is: %d "  % UnixDiff
 
-	# Only continue if the message is less than two days old
-	if(UnixDiff > 172800):
+	# Only continue if the message is less than DisplayTimeLimit seconds old
+	if(UnixDiff < DisplayTimeLimit):
 		
 		display(pollData["address"])
 
+
+if __name__ == "__main__":
+
+	# Do forever (I have been doing to much embeded C recently...)
+	while(True):
+
+		pollData = pollServer()
+
+		# Pass to the handler
+		handleResponse(pollData)
+
+		# Wait for given time before preforming the next poll
+		time.sleep(PollRateDelay) 
 	

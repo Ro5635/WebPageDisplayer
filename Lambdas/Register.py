@@ -77,7 +77,9 @@ def lambda_handler(event, context):
 
 	# Return a https link to the new file for use in the polling
 	# Interestingly there is not a param avlible for the buclet URI...
-	return 'https://s3-eu-west-1.amazonaws.com/' + bucketName + '/' + newFileName
+	accessURL = 'https://s3-eu-west-1.amazonaws.com/' + bucketName + '/' + newFileName
+
+	return json.dumps({"accessURL" : accessURL , "iD" : newFileName}, sort_keys=True)
 
 
 """

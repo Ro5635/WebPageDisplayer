@@ -34,9 +34,12 @@
 
 import boto3
 import random
+import time
 
 # Put the bucket to be used here
 bucketName = 'arroneventditribution'
+# Poll Delay in seconds
+pollDelay = 60
 
 
 """
@@ -94,16 +97,17 @@ def createNewFile(file, contents):
 
 
 def generateJSON():
+	
+	# This will likley be refactored out at this point soon...
 
-	jsonContent = """
-{
-'pollDelay' : 60
-}
+	return json.dumps({"pollDelay": pollDelay, "registerdAt" : time.time()}, sort_keys=True)
+
 
 """
-	return jsonContent
+	getFileName
 
-
+	Generates the name for the file/key
+"""
 def getFileName():
 
 	# Get a new psudo random ID

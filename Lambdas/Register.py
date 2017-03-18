@@ -1,7 +1,28 @@
 """
 
 	Lambda function to be run on AWS Lambda serverless compute platform; called by the AWS API gateway on the register endpoint.
+	The lambda will require access to the relevent S3 bucket, a sample policy for this is included bellow:
 
+	{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+            	"s3:ListBucket",
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::arroneventditribution/*"
+            ]
+        }
+    ]
+	}
+
+	The service will also require the 'AWSLambdaBasicExecutionRole' canned policy for access to the logging stream.
 
 	Note boto provides an interface to directly write the text string to an S3 object; may be worth a look...
 
@@ -14,6 +35,8 @@
 import boto3
 import random
 
+# Put the bucket to be used here
+bucketName = 'arroneventditribution'
 
 
 """
@@ -26,7 +49,7 @@ def lambda_handler(event, context):
 	
 	s3 = boto3.resource('s3')
 	
-	bucket = s3.Bucket('arroneventditribution')
+	bucket = s3.Bucket(bucketName)
 
 	jsonContent = generateJSON()
 
@@ -38,14 +61,19 @@ def lambda_handler(event, context):
 	# Upload the new file to S3
 	bucket.upload_file('/tmp/taekwondo.txt', newFileName)
 
+	# Get the S3 Client, used to add ACL to bucket objects
+	client = boto3.client('s3')
 
-	hello_key = bucket.get_key(newFileName)
-	hello_key.set_canned_acl('public-read')
-
+	# Make the new object public read
+	response = client.put_object_acl(
+    	ACL='public-read',
+    	Bucket=bucketName,
+    	Key=newFileName,
+	)
 
 	# Return a https link to the new file for use in the polling
 	# Interestingly there is not a param avlible for the buclet URI...
-	return newFileName
+	return 'https://s3-eu-west-1.amazonaws.com/' + bucketName + '/' + newFileName
 
 
 """
@@ -68,11 +96,11 @@ def createNewFile(file, contents):
 def generateJSON():
 
 	jsonContent = """
-	{
-	'pollDelay' : 60
-	}
+{
+'pollDelay' : 60
+}
 
-	"""
+"""
 	return jsonContent
 
 

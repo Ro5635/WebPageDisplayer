@@ -35,6 +35,7 @@
 import boto3
 import random
 import time
+import json
 
 # Put the bucket to be used here
 bucketName = 'arroneventditribution'
